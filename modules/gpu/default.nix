@@ -16,17 +16,11 @@ in
     # consumer's zen default (mkForce to override).
     boot.kernelPackages = pkgs.linuxPackages_6_18;
 
+    # gttsize/ttm: size the GTT and TTM page pools for the 16 GiB unified RAM.
     boot.kernelParams = [
-      "mitigations=off"
-
-      # gttsize/ttm: size the GTT and TTM page pools for the 16 GiB unified RAM.
       "amdgpu.gttsize=14750"
       "ttm.pages_limit=3776000"
       "ttm.page_pool_size=3776000"
-
-      # IOMMU is unstable on this card and must never come on.
-      "amd_iommu=off"
-      "iommu=off"
     ];
 
     hardware = {
@@ -37,7 +31,6 @@ in
       graphics.enable = lib.mkDefault true;
     };
 
-    # OpenCL/ROCm and LACT are left to the consumer (heavy / opinionated).
     environment.systemPackages = with pkgs; [
       amdgpu_top
       vulkan-tools # vulkaninfo, for probing GPU state

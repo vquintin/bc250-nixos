@@ -54,7 +54,10 @@ in
   };
 
   config = lib.mkIf (cfg.enable && ucfg.enable) {
-    environment.systemPackages = [ ucfg.package ];
+    environment.systemPackages = [
+      ucfg.package
+      pkgs.stress-ng # validate the unlocked cores: stress-ng --cpu 16 --verify
+    ];
 
     systemd.services.bc250-core-unlock = {
       description = "AMD BC-250 CPU core unlock (6c -> 8c; reboots once to enumerate)";

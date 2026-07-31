@@ -27,14 +27,17 @@ in
     '';
   };
 
-  # Recommended non-hardware software tuning, applied whenever the board is
-  # enabled. All mkDefault, so a host setting still overrides:
-  #   * performance cpufreq governor -- schedutil's ramp lag hurt frame-time 1%
-  #     lows on this board;
-  #   * scx_lavd sched_ext scheduler.
   config = lib.mkIf cfg.enable {
-    powerManagement.cpuFreqGovernor = lib.mkDefault "performance";
+    # IOMMU is unstable on this card and must never come on.
+    boot.kernelParams = [
+      "amd_iommu=off"
+      "iommu=off"
+    ];
 
+    # Recommended software tuning (mkDefault, host-overridable): the performance
+    # cpufreq governor -- schedutil's ramp lag hurt frame-time 1% lows here --
+    # and the scx_lavd sched_ext scheduler.
+    powerManagement.cpuFreqGovernor = lib.mkDefault "performance";
     services.scx = {
       enable = lib.mkDefault true;
       scheduler = lib.mkDefault "scx_lavd";
