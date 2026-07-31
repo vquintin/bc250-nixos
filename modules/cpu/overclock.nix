@@ -36,7 +36,8 @@ in
   options.hardware.bc250.cpu.overclock = {
     enable = lib.mkEnableOption "BC-250 CPU overclock/undervolt applied at boot";
 
-    package = lib.mkPackageOption pkgs [ "bc250" "bc250-smu-oc" ] { };
+    # Package lives on the service (services.bc250-smu-oc.package); the facade
+    # reuses it for the always-installed bc250-detect tool below.
 
     frequency = lib.mkOption {
       type = lib.types.ints.between 3500 4500;
@@ -64,9 +65,11 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # Always available so `bc250-detect` can find this board's stable curve.
+    # Always available so `bc250-detect` can find this board's stable curve. Use
+    # the service's package option (its default, or a host override) so the tool
+    # on PATH and the one the service runs are always the same build.
     environment.systemPackages = [
-      ocfg.package
+      config.services.bc250-smu-oc.package
       pkgs.stress
     ];
 
@@ -74,7 +77,6 @@ in
     # options above.
     services.bc250-smu-oc = lib.mkIf ocfg.enable {
       enable = true;
-      package = ocfg.package;
       inherit configFile;
     };
   };
