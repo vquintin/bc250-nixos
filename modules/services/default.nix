@@ -7,5 +7,6 @@
     ./cyan-skillfish-governor.nix
     ./bc250-smu-oc.nix
     ./bc250-core-unlock.nix
+    ./bc250-memcfg.nix
   ];
 }

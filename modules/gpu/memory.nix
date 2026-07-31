@@ -18,32 +18,6 @@ let
   gttPages = cfg.gpu.gttSize * 256;
 
   vramMiB = if cfg.gpu.vramSize == null then 0 else cfg.gpu.vramSize;
-
-  # Read the current UMA_SIZE from CMOS and write only when it differs, so a
-  # steady-state boot leaves CMOS untouched instead of rewriting it every time.
-  # `bc250memcfg` with no args dumps `KEY=VALUE` lines; the value may carry
-  # leading zeros, so normalise it as decimal (10#) before comparing.
-  memcfgApply = pkgs.writeShellApplication {
-    name = "bc250-memcfg-apply";
-    runtimeInputs = [
-      cfg.gpu.memcfgPackage
-      pkgs.gnugrep
-      pkgs.coreutils
-    ];
-    text = ''
-      requested=${toString cfg.gpu.vramSize}
-      current=$(bc250memcfg | grep -E '^UMA_SIZE=' | cut -d= -f2 || true)
-      if [ -n "$current" ]; then
-        current=$((10#$current))
-      fi
-      if [ "$current" = "$requested" ]; then
-        echo "UMA_SIZE already ''${requested} MiB in CMOS; leaving it."
-      else
-        echo "Setting UMA_SIZE ''${current:-unknown} -> ''${requested} MiB in CMOS."
-        bc250memcfg UMA_SIZE "$requested"
-      fi
-    '';
-  };
 in
 {
   # Sizes the two chunks of the BC-250's 16 GiB unified RAM the GPU cares about:
@@ -120,26 +94,12 @@ in
           }
         ];
 
-        environment.systemPackages = [ cfg.gpu.memcfgPackage ];
-
-        # Stage the CMOS value during `nixos-rebuild switch` too, so a rebuild
-        # applies it right away instead of only converging on the next boot. The
-        # boot oneshot below is the backstop, so this is best-effort: a hiccup
-        # here (e.g. a transient port-I/O error) must not fail the activation.
-        system.activationScripts.bc250-memcfg.text = ''
-          ${lib.getExe memcfgApply} || echo "bc250-memcfg: CMOS update during activation failed; will retry at boot" >&2
-        '';
-
-        systemd.services.bc250-memcfg = {
-          description = "Set BC-250 VRAM (UMA_SIZE) to ${toString cfg.gpu.vramSize} MiB in CMOS";
-          wantedBy = [ "multi-user.target" ];
-          after = [ "systemd-modules-load.service" ];
-          serviceConfig = {
-            Type = "oneshot";
-            RemainAfterExit = true;
-            # Port-I/O tool; needs raw I/O to reach the CMOS index/data ports.
-            ExecStart = lib.getExe memcfgApply;
-          };
+        # Drive the standalone CMOS service to assert the VRAM size (write-if-
+        # drifted, at boot and on activation -- both default on in the service).
+        services.bc250-memcfg = {
+          enable = true;
+          package = cfg.gpu.memcfgPackage;
+          settings.UMA_SIZE = cfg.gpu.vramSize;
         };
       })
     ]
