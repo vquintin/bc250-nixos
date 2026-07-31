@@ -51,8 +51,9 @@ in
   #    bc250_memcfg (no modded BIOS). Upstream: https://github.com/fanoush/bc250_memcfg
   #    The tool writes the memory-config block the BIOS reads at POST, so a change
   #    only takes effect on the *next* reboot; once written it persists in CMOS.
-  #    The oneshot re-asserts the size every boot (writing only when it drifted)
-  #    so it's self-healing (e.g. after a CMOS clear / battery pull).
+  #    It's applied on `nixos-rebuild switch` and re-asserted every boot (writing
+  #    only when it drifted), so it's self-healing (e.g. after a CMOS clear /
+  #    battery pull).
   #  - gttSize: the GART/GTT aperture, driving amdgpu.gttsize and the matching TTM
   #    page limits via kernel params.
   options.hardware.bc250.gpu = {
@@ -120,6 +121,14 @@ in
         ];
 
         environment.systemPackages = [ cfg.gpu.memcfgPackage ];
+
+        # Stage the CMOS value during `nixos-rebuild switch` too, so a rebuild
+        # applies it right away instead of only converging on the next boot. The
+        # boot oneshot below is the backstop, so this is best-effort: a hiccup
+        # here (e.g. a transient port-I/O error) must not fail the activation.
+        system.activationScripts.bc250-memcfg.text = ''
+          ${lib.getExe memcfgApply} || echo "bc250-memcfg: CMOS update during activation failed; will retry at boot" >&2
+        '';
 
         systemd.services.bc250-memcfg = {
           description = "Set BC-250 VRAM (UMA_SIZE) to ${toString cfg.gpu.vramSize} MiB in CMOS";
