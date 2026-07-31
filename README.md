@@ -77,6 +77,5 @@ unfree.
 
 ## Not included
 
-Host-specific or still-experimental bits are intentionally left to the consumer:
-disk layout, S4 hibernation, memory-latency sysctls, and the OpenCL/ROCm stack
-and LACT.
+Host policy is left to the consumer — e.g. disk layout, hibernation, and the
+OpenCL/ROCm stack.
