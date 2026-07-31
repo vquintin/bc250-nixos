@@ -13,6 +13,7 @@
 #   bc250-cu-mask          prints the disable_cu= line to add if a bad WGP is
 #                          found (don't --install: it writes /etc/modprobe.d,
 #                          which NixOS ignores)
+#   bc250-40cu-benchmark   Vulkan compute throughput benchmark across the CUs
 #
 # The upstream enable-* installer scripts are intentionally omitted: they rebuild
 # amdgpu out-of-tree, which cu-unlock.nix already does via boot.kernelPatches.
