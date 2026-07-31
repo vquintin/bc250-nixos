@@ -83,6 +83,13 @@ unfree.
 
 ## Warnings
 
+- **`gpu.cuUnlock` rebuilds the kernel.** It applies an out-of-tree amdgpu
+  patch via `boot.kernelPatches`, so enabling it **compiles the kernel from
+  source** — a long, resource-heavy build with no binary-cache hit, and it
+  recompiles whenever the kernel or patch changes. Budget the build time (and
+  disk/RAM) accordingly, or leave it off. A no-rebuild alternative
+  (`bc250-cu-live-manager`, which sets the CU masks at runtime) is planned as a
+  `services.*` module.
 - **`gpu.cuUnlock`** exposes CUs the factory masked, some of which may be
   defective. **Verify the unlock works properly before trusting it**: enable
   `gpu.diagnostics` and run `bc250-compute-verify` (heavy Vulkan compute
