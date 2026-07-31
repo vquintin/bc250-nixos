@@ -19,6 +19,8 @@ On by default with `enable`:
 - **ACPI fix** — SSDTs adding the CPU C-/P-states the stock firmware omits.
 - **nct6687 sensors** — out-of-tree driver for the board's Nuvoton Super-I/O
   chip, exposing temps/voltages/fans to lm_sensors.
+- **zswap tuning** — lz4/zsmalloc compressed cache in front of disk swap
+  (preferred over zram here); auto-applies once the host defines a swap device.
 
 Opt-in:
 

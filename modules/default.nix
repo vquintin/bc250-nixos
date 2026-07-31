@@ -7,6 +7,7 @@ in
     ./cpu
     ./gpu
     ./sensors.nix
+    ./zswap.nix
   ];
 
   options.hardware.bc250.enable = lib.mkOption {
@@ -18,8 +19,9 @@ in
       support: the GPU/board baseline (amdgpu, the 6.18 LTS kernel, IOMMU
       disabled, the GTT/TTM tuning the shared 16 GiB memory needs), the SMU GPU
       governor, the CMOS VRAM size, the ACPI C/P-state fix, the nct6687 sensor
-      driver, and the recommended scheduler/governor tuning (performance cpufreq
-      governor + scx_lavd, both mkDefault). Individual features are toggled under
+      driver, the recommended zswap tuning (once the host defines swap), and the
+      recommended scheduler/governor tuning (performance cpufreq governor +
+      scx_lavd, both mkDefault). Individual features are toggled under
       {option}`hardware.bc250.cpu.*` and {option}`hardware.bc250.gpu.*`.
 
       Opt-in, off by default: the 40 CU unlock, the 8-core unlock, and the CPU
