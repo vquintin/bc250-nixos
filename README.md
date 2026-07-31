@@ -95,3 +95,10 @@ unfree.
 
 Host policy is left to the consumer — e.g. disk layout, hibernation, and the
 OpenCL/ROCm stack.
+
+## License
+
+The glue in this repo (modules, packaging expressions) is [MIT](LICENSE). The
+upstream projects it fetches and wraps keep their own licenses — see each
+`packages/*.nix`'s `meta.license` (note `bc250-memcfg` is unfree: no upstream
+license).
