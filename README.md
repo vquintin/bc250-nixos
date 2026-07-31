@@ -7,18 +7,23 @@ gaming/compute box. One import plus a nested `hardware.bc250.*` option tree.
 It packages and wires the community tooling documented at
 [elektricM/amd-bc250-docs](https://github.com/elektricM/amd-bc250-docs):
 
+On by default with `enable`:
+
 - **amdgpu baseline** — 6.18 LTS kernel, GTT/TTM sizing for the 16 GiB unified
   RAM, IOMMU off.
+- **recommended tuning** — performance cpufreq governor + `scx_lavd` scheduler
+  (both `mkDefault`).
 - **40 CU unlock** — out-of-tree amdgpu patch exposing all 40 RDNA2 CUs (factory
   firmware masks 16), plus a `disabledCUs` list to mask bad WGPs.
 - **cyan-skillfish GPU governor** — adaptive SMU clock/voltage control.
 - **VRAM/UMA size** via CMOS (`bc250_memcfg`), self-healing each boot.
 - **ACPI fix** — SSDTs adding the CPU C-/P-states the stock firmware omits.
-- **recommended tuning** — performance cpufreq governor + `scx_lavd` scheduler
-  (both `mkDefault`, part of `enable`).
-- **8-core unlock** *(opt-in)* — SMU core-mask write bringing 6c/12t to 8c/16t.
-- **CPU overclock/undervolt** *(opt-in)* — via SMU (brick risk, see below).
-- **40 CU diagnostic/health tools** *(opt-in)*.
+
+Opt-in:
+
+- **8-core unlock** — SMU core-mask write bringing 6c/12t to 8c/16t.
+- **CPU overclock/undervolt** — via SMU (brick risk, see below).
+- **40 CU diagnostic/health tools**.
 
 ## Usage
 
