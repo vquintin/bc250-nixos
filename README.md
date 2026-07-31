@@ -58,7 +58,8 @@ unfree.
   defective. **Verify the unlock works properly before trusting it**: enable
   `gpu.diagnostics` and run `bc250-compute-verify` (heavy Vulkan compute
   correctness test); mask any bad WGP it finds via `gpu.disabledCUs`
-  (`bc250-cu-mask` prints the coordinates).
+  (`bc250-cu-mask` prints the coordinates). Note: `gpu.disabledCUs` is untested —
+  all 40 CUs on my board are healthy, so I never needed to mask any.
 - **`cpu.overclock`** can *permanently brick* the board if you raise frequency
   without a matching undervolt. `scale` is a board-specific curve shift, not a
   voltage — find it with `bc250-detect` (on `PATH` whenever the board is
