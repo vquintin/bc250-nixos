@@ -150,6 +150,13 @@ in
     systemd.services.cyan-skillfish-governor-smu = {
       description = "Cyan Skillfish GPU Governor (SMU)";
       wantedBy = [ "multi-user.target" ];
+      # Only one governor may drive the SMU mailbox; refuse to co-run with the
+      # other cyan-skillfish/oberon governor variants a host might have around.
+      conflicts = [
+        "cyan-skillfish-governor.service"
+        "cyan-skillfish-governor-tt.service"
+        "oberon-governor.service"
+      ];
       after = [
         "systemd-modules-load.service"
         "dbus.service"
