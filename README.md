@@ -14,8 +14,8 @@ It packages and wires the community tooling documented at
 - **cyan-skillfish GPU governor** — adaptive SMU clock/voltage control.
 - **VRAM/UMA size** via CMOS (`bc250_memcfg`), self-healing each boot.
 - **ACPI fix** — SSDTs adding the CPU C-/P-states the stock firmware omits.
-- **recommended defaults** (`useRecommendedDefaults`, on by default) —
-  performance cpufreq governor + `scx_lavd` scheduler.
+- **recommended tuning** — performance cpufreq governor + `scx_lavd` scheduler
+  (both `mkDefault`, part of `enable`).
 - **8-core unlock** *(opt-in)* — SMU core-mask write bringing 6c/12t to 8c/16t.
 - **CPU overclock/undervolt** *(opt-in)* — via SMU (brick risk, see below).
 - **40 CU diagnostic/health tools** *(opt-in)*.
@@ -32,8 +32,7 @@ inputs.bc250.url = "github:vquintin/bc250-nixos";
 
   hardware.bc250 = {
     enable = true;                 # baseline + 40 CU + governor + VRAM + ACPI fix
-    # useRecommendedDefaults = true;    # performance governor + scx_lavd (default)
-
+                                   # + performance governor + scx_lavd
     cpu = {
       coreUnlock.enable = true;         # 8c/16t (writes SMU mask, reboots once)
       # overclock = { enable = true; frequency = 3500; scale = -13; };  # see WARNING
@@ -71,8 +70,8 @@ unfree.
 
 ## Layout
 
-- `modules/` — plain NixOS modules (`cpu/`, `gpu/`, `recommended-defaults.nix`),
-  the `hardware.bc250.*` tree.
+- `modules/` — plain NixOS modules (`cpu/`, `gpu/`, `defaults.nix`), the
+  `hardware.bc250.*` tree.
 - `packages/` — the `pkgs.bc250.*` overlay (governor, smu-oc, core-unlock,
   40cu-tools, memcfg).
 - `patches/` — the 40 CU amdgpu kernel patch.
