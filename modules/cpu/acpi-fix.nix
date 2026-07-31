@@ -44,7 +44,7 @@ in
     '';
   };
 
-  config = lib.mkIf cfg.cpu.acpiFix.enable {
+  config = lib.mkIf (cfg.enable && cfg.cpu.acpiFix.enable) {
     # Prepended raw (uncompressed) ahead of the main initramfs, like microcode.
     boot.initrd.prepend = [ "${acpiOverride}" ];
   };
