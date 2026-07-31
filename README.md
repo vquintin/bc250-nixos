@@ -59,6 +59,13 @@ The aggregate module applies the package overlay (`pkgs.bc250.*`) itself.
 `bc250-memcfg` is unfree (no upstream license), so the consumer must allow
 unfree.
 
+## Examples
+
+`examples/` is a standalone flake building two BC-250 raw-efi disk images:
+
+- `nix build .#steamos` — a Jovian/SteamOS gaming image.
+- `nix build .#inference` — a headless image serving Vulkan-accelerated `ollama`.
+
 ## Warnings
 
 - **`gpu.cuUnlock`** exposes CUs the factory masked, some of which may be
@@ -81,6 +88,8 @@ unfree.
 - `modules/` — plain NixOS modules (`cpu/`, `gpu/`), the `hardware.bc250.*` tree.
 - `packages/` — the `pkgs.bc250.*` overlay (governor, smu-oc, core-unlock,
   40cu-tools, memcfg).
+- `examples/` — a standalone flake building a SteamOS and a Vulkan-inference
+  image.
 
 ## Not included
 
