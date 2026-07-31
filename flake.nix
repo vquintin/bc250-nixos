@@ -39,6 +39,6 @@
       # `nix flake check` builds every package.
       checks.${system} = self.packages.${system};
 
-      formatter.${system} = pkgs.nixfmt-rfc-style;
+      formatter.${system} = pkgs.nixfmt;
     };
 }
