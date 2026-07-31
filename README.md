@@ -70,8 +70,7 @@ unfree.
 
 ## Layout
 
-- `modules/` — plain NixOS modules (`cpu/`, `gpu/`, `defaults.nix`), the
-  `hardware.bc250.*` tree.
+- `modules/` — plain NixOS modules (`cpu/`, `gpu/`), the `hardware.bc250.*` tree.
 - `packages/` — the `pkgs.bc250.*` overlay (governor, smu-oc, core-unlock,
   40cu-tools, memcfg).
 - `patches/` — the 40 CU amdgpu kernel patch.
