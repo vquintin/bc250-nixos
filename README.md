@@ -4,6 +4,13 @@ NixOS modules and packages for the **AMD BC-250** (ASRock BC-250, "Oberon" APU,
 Cyan Skillfish `gfx1013`) — the ex-mining board repurposed as a small RDNA2
 gaming/compute box. One import plus a nested `hardware.bc250.*` option tree.
 
+> [!NOTE]
+> This repo is mostly **vibe-coded** — assembled quickly in an AI-assisted
+> session, validated by evaluating/building the configs and running them on my
+> own BC-250, not hand-audited line by line. It works here, but read it before
+> trusting it on your board. Flagging this up front because some people would
+> rather know.
+
 It packages and wires the community tooling documented at
 [elektricM/amd-bc250-docs](https://github.com/elektricM/amd-bc250-docs):
 
@@ -119,6 +126,37 @@ fine (same underlying module, deduplicated).
 
 Host policy is left to the consumer — e.g. disk layout, hibernation, and the
 OpenCL/ROCm stack.
+
+## Credits
+
+This repo is mostly glue; the hard work belongs to the BC-250 community. The
+tools it packages and wires:
+
+- [elektricM/amd-bc250-docs](https://github.com/elektricM/amd-bc250-docs) — the
+  community documentation hub this follows.
+- [filippor/cyan-skillfish-governor](https://github.com/filippor/cyan-skillfish-governor)
+  (`smu` branch) — the adaptive SMU GPU governor.
+- [duggasco/bc250-40cu-unlock](https://github.com/duggasco/bc250-40cu-unlock) —
+  the 40 CU amdgpu patch and diagnostic/health tools.
+- [rw-r-r-0644/bc250-core-unlock](https://github.com/rw-r-r-0644/bc250-core-unlock)
+  — the 8-core SMU unlock.
+- [bc250-collective/bc250_smu_oc](https://github.com/bc250-collective/bc250_smu_oc)
+  — CPU overclock/undervolt via the SMU.
+- [bc250-collective/bc250-acpi-fix](https://github.com/bc250-collective/bc250-acpi-fix)
+  — the C-/P-state SSDTs.
+- [fanoush/bc250_memcfg](https://github.com/fanoush/bc250_memcfg) — CMOS
+  VRAM/UMA sizing without a modded BIOS.
+- [Fred78290/nct6687d](https://github.com/Fred78290/nct6687d) — the Nuvoton
+  NCT6687 sensor driver.
+- [sched-ext/scx](https://github.com/sched-ext/scx) — the `scx_lavd` scheduler
+  used in the default tuning.
+
+And a nod to
+[TesseractCat/bc250-nixos](https://github.com/TesseractCat/bc250-nixos), a
+parallel BC-250 NixOS flake I only found late into this session — worth a look,
+and the source of a few things adopted here (memcfg write-if-differs, the
+governor `Conflicts=`, the `nct6687` driver, and the standalone `services.*`
+layout).
 
 ## License
 
