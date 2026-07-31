@@ -55,9 +55,11 @@ inputs.bc250.url = "github:vquintin/bc250-nixos";
       # gttSize = 14750;                # GTT aperture (MiB); vramSize+gttSize <= 16384
       # disabledCUs = [ "0.0.4" ];      # mask a bad WGP found via diagnostics
       # diagnostics.enable = true;      # cu_map / compute-verify / health tools
-      # governor.safePoints = [ ... ];  # override the voltage curve
     };
   };
+
+  # The governor is on by default; tune its curve on the standalone service:
+  # services.cyan-skillfish-governor-smu.safePoints = [ ... ];  # voltage curve
 }
 ```
 

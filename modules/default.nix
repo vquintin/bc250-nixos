@@ -4,6 +4,7 @@ let
 in
 {
   imports = [
+    ./services
     ./cpu
     ./gpu
     ./sensors.nix
