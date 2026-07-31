@@ -6,22 +6,48 @@
 }:
 let
   cfg = config.hardware.bc250;
+
+  # Read the current UMA_SIZE from CMOS and write only when it differs, so a
+  # steady-state boot leaves CMOS untouched instead of rewriting it every time.
+  # `bc250memcfg` with no args dumps `KEY=VALUE` lines; the value may carry
+  # leading zeros, so normalise it as decimal (10#) before comparing.
+  memcfgApply = pkgs.writeShellApplication {
+    name = "bc250-memcfg-apply";
+    runtimeInputs = [
+      cfg.gpu.memcfgPackage
+      pkgs.gnugrep
+      pkgs.coreutils
+    ];
+    text = ''
+      requested=${toString cfg.gpu.vramSizeMiB}
+      current=$(bc250memcfg | grep -E '^UMA_SIZE=' | cut -d= -f2 || true)
+      if [ -n "$current" ]; then
+        current=$((10#$current))
+      fi
+      if [ "$current" = "$requested" ]; then
+        echo "UMA_SIZE already ''${requested} MiB in CMOS; leaving it."
+      else
+        echo "Setting UMA_SIZE ''${current:-unknown} -> ''${requested} MiB in CMOS."
+        bc250memcfg UMA_SIZE "$requested"
+      fi
+    '';
+  };
 in
 {
   # Sets the BC-250's UMA frame-buffer (VRAM) size via battery-backed CMOS,
   # without a modded BIOS. Upstream: https://github.com/fanoush/bc250_memcfg
   # The tool writes the memory-config block the BIOS reads at POST, so a change
   # only takes effect on the *next* reboot; once written it persists in CMOS. The
-  # oneshot re-asserts the size every boot so it's self-healing (e.g. after a CMOS
-  # clear / battery pull).
+  # oneshot re-asserts the size every boot (writing only when it drifted) so it's
+  # self-healing (e.g. after a CMOS clear / battery pull).
   options.hardware.bc250.gpu = {
     vramSizeMiB = lib.mkOption {
       type = lib.types.nullOr (lib.types.ints.between 256 8192);
       default = 512;
       description = ''
         UMA frame-buffer (VRAM) size in MiB, carved from the 16 GiB unified RAM
-        and written to CMOS each boot. 16 MiB aligned, >= 256. Set to null to
-        leave the CMOS value untouched.
+        and written to CMOS whenever it drifts from this value. 16 MiB aligned,
+        >= 256. Set to null to leave the CMOS value untouched.
       '';
     };
 
@@ -48,7 +74,7 @@ in
         Type = "oneshot";
         RemainAfterExit = true;
         # Port-I/O tool; needs raw I/O to reach the CMOS index/data ports.
-        ExecStart = "${lib.getExe cfg.gpu.memcfgPackage} UMA_SIZE ${toString cfg.gpu.vramSizeMiB}";
+        ExecStart = lib.getExe memcfgApply;
       };
     };
   };
