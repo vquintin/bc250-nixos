@@ -5,6 +5,11 @@
   #
   # Both are raw-efi images (dd to the board's SSD). For local hacking against a
   # checkout, add: --override-input bc250 path:..
+  #
+  # This example intentionally ships no flake.lock: the `bc250` input below
+  # points at the public repo, so the lock can only be generated once that repo
+  # is public. After the first push, run `nix flake lock` here and commit the
+  # result to pin jovian / nixos-generators / nixpkgs for reproducible images.
   description = "Example BC-250 images (SteamOS + Vulkan inference) on bc250-nixos";
 
   inputs = {
