@@ -32,20 +32,14 @@ in
     hardware = {
       amdgpu = {
         overdrive.enable = true;
-        opencl.enable = true;
         initrd.enable = true;
       };
-      graphics = {
-        enable = lib.mkDefault true;
-        extraPackages = [ pkgs.rocmPackages.clr.icd ];
-      };
+      graphics.enable = lib.mkDefault true;
     };
 
-    services.lact.enable = true;
-
+    # OpenCL/ROCm and LACT are left to the consumer (heavy / opinionated).
     environment.systemPackages = with pkgs; [
       amdgpu_top
-      clinfo
       vulkan-tools # vulkaninfo, for probing GPU state
     ];
   };

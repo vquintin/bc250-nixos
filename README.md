@@ -8,7 +8,7 @@ It packages and wires the community tooling documented at
 [elektricM/amd-bc250-docs](https://github.com/elektricM/amd-bc250-docs):
 
 - **amdgpu baseline** — 6.18 LTS kernel, GTT/TTM sizing for the 16 GiB unified
-  RAM, IOMMU off, `lact`.
+  RAM, IOMMU off.
 - **40 CU unlock** — out-of-tree amdgpu patch exposing all 40 RDNA2 CUs (factory
   firmware masks 16), plus a `disabledCUs` list to mask bad WGPs.
 - **cyan-skillfish GPU governor** — adaptive SMU clock/voltage control.
@@ -78,4 +78,5 @@ unfree.
 ## Not included
 
 Host-specific or still-experimental bits are intentionally left to the consumer:
-disk layout, S4 hibernation, and memory-latency sysctls.
+disk layout, S4 hibernation, memory-latency sysctls, and the OpenCL/ROCm stack
+and LACT.
