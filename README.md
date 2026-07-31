@@ -13,14 +13,15 @@ On by default with `enable`:
   RAM, IOMMU off.
 - **recommended tuning** — performance cpufreq governor + `scx_lavd` scheduler
   (both `mkDefault`).
-- **40 CU unlock** — out-of-tree amdgpu patch exposing all 40 RDNA2 CUs (factory
-  firmware masks 16), plus a `disabledCUs` list to mask bad WGPs.
 - **cyan-skillfish GPU governor** — adaptive SMU clock/voltage control.
 - **VRAM/UMA size** via CMOS (`bc250_memcfg`), self-healing each boot.
 - **ACPI fix** — SSDTs adding the CPU C-/P-states the stock firmware omits.
 
 Opt-in:
 
+- **40 CU unlock** — out-of-tree amdgpu patch exposing all 40 RDNA2 CUs (factory
+  firmware masks 16), plus a `disabledCUs` list to mask bad WGPs. Rebuilds the
+  kernel.
 - **8-core unlock** — SMU core-mask write bringing 6c/12t to 8c/16t.
 - **CPU overclock/undervolt** — via SMU (brick risk, see below).
 - **40 CU diagnostic/health tools**.
@@ -36,7 +37,7 @@ inputs.bc250.url = "github:vquintin/bc250-nixos";
   imports = [ inputs.bc250.nixosModules.default ];
 
   hardware.bc250 = {
-    enable = true;                 # baseline + 40 CU + governor + VRAM + ACPI fix
+    enable = true;                 # baseline + governor + VRAM + ACPI fix
                                    # + performance governor + scx_lavd
     cpu = {
       coreUnlock.enable = true;         # 8c/16t (writes SMU mask, reboots once)
@@ -44,6 +45,7 @@ inputs.bc250.url = "github:vquintin/bc250-nixos";
     };
 
     gpu = {
+      cuUnlock.enable = true;           # unlock all 40 CUs (rebuilds the kernel)
       vramSizeMiB = 512;                # default
       # disabledCUs = [ "0.0.4" ];      # mask a bad WGP found via diagnostics
       # diagnostics.enable = true;      # cu_map / compute-verify / health tools

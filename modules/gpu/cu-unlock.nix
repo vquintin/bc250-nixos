@@ -20,16 +20,11 @@ in
   # other host sharing this kernel. Rebuilds the kernel from source.
   # Source: https://github.com/duggasco/bc250-40cu-unlock
   options.hardware.bc250.gpu.cuUnlock = {
-    enable = lib.mkOption {
-      type = lib.types.bool;
-      default = cfg.enable;
-      defaultText = lib.literalExpression "config.hardware.bc250.enable";
-      description = ''
-        Unlock all 40 RDNA2 compute units (factory firmware exposes 24). Applies
-        an out-of-tree amdgpu patch, so it rebuilds the kernel. On by default when
-        {option}`hardware.bc250.enable` is set.
-      '';
-    };
+    enable = lib.mkEnableOption ''
+      the 40 CU unlock -- expose all 40 RDNA2 compute units (factory firmware
+      exposes 24). Applies an out-of-tree amdgpu patch, so it rebuilds the
+      kernel, and some unlocked CUs may be defective (see the README), so it is
+      opt-in'';
 
     mode = lib.mkOption {
       type = lib.types.ints.between 0 3;
