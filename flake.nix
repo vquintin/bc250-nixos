@@ -13,18 +13,31 @@
         config.allowUnfree = true;
         overlays = [ self.overlays.default ];
       };
+
+      # A NixOS module bundling the package overlay, so the imported modules can
+      # reach pkgs.bc250.* without the consumer wiring the overlay themselves.
+      withOverlay = mods: {
+        imports = mods;
+        nixpkgs.overlays = [ self.overlays.default ];
+      };
     in
     {
       # Packages under pkgs.bc250.*, reusable standalone.
       overlays.default = import ./packages;
 
-      # Aggregate module: import once, toggle via hardware.bc250.*. Applies the
-      # overlay so the modules can reach pkgs.bc250.*.
-      nixosModules.bc250 = {
-        imports = [ ./modules ];
-        nixpkgs.overlays = [ self.overlays.default ];
+      nixosModules = {
+        # Aggregate: import once, toggle via hardware.bc250.*.
+        bc250 = withOverlay [ ./modules ];
+        default = self.nixosModules.bc250;
+
+        # The standalone services.* modules, each usable on its own (they bundle
+        # the overlay, so services.<tool>.enable works without importing the
+        # aggregate). hardware.bc250.* drives these under the hood.
+        cyan-skillfish-governor-smu = withOverlay [ ./modules/services/cyan-skillfish-governor.nix ];
+        bc250-smu-oc = withOverlay [ ./modules/services/bc250-smu-oc.nix ];
+        bc250-core-unlock = withOverlay [ ./modules/services/bc250-core-unlock.nix ];
+        bc250-memcfg = withOverlay [ ./modules/services/bc250-memcfg.nix ];
       };
-      nixosModules.default = self.nixosModules.bc250;
 
       packages.${system} = {
         inherit (pkgs.bc250)

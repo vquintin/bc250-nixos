@@ -93,11 +93,27 @@ unfree.
 
 ## Layout
 
-- `modules/` — plain NixOS modules (`cpu/`, `gpu/`), the `hardware.bc250.*` tree.
+- `modules/` — the `hardware.bc250.*` facade tree (`cpu/`, `gpu/`), plus
+  `modules/services/` — standalone `services.<tool>.*` modules (the governor,
+  smu-oc, core-unlock, memcfg mechanisms) that the facade drives.
 - `packages/` — the `pkgs.bc250.*` overlay (governor, smu-oc, core-unlock,
   40cu-tools, memcfg).
 - `examples/` — a standalone flake building a SteamOS and a Vulkan-inference
   image.
+
+### Standalone services
+
+The service modules are reusable on their own, without the `hardware.bc250`
+aggregate — each is exposed as a flake output that bundles the package overlay:
+
+```nix
+imports = [ inputs.bc250.nixosModules.cyan-skillfish-governor-smu ];
+services.cyan-skillfish-governor-smu.enable = true;
+```
+
+Also `nixosModules.bc250-smu-oc`, `nixosModules.bc250-core-unlock`,
+`nixosModules.bc250-memcfg`. Importing one of these alongside the aggregate is
+fine (same underlying module, deduplicated).
 
 ## Not included
 
