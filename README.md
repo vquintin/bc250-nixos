@@ -49,7 +49,8 @@ inputs.bc250.url = "github:vquintin/bc250-nixos";
 
     gpu = {
       cuUnlock.enable = true;           # unlock all 40 CUs (rebuilds the kernel)
-      vramSizeMiB = 512;                # default
+      vramSize = 512;                   # VRAM/UMA carve-out (MiB), default
+      # gttSize = 14750;                # GTT aperture (MiB); vramSize+gttSize <= 16384
       # disabledCUs = [ "0.0.4" ];      # mask a bad WGP found via diagnostics
       # diagnostics.enable = true;      # cu_map / compute-verify / health tools
       # governor.safePoints = [ ... ];  # override the voltage curve

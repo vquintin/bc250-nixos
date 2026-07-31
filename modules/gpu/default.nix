@@ -11,7 +11,7 @@ in
   imports = [
     ./cu-unlock.nix
     ./cu-list.nix
-    ./vram.nix
+    ./memory.nix
     ./diagnostics.nix
     ./governor.nix
   ];
@@ -21,12 +21,7 @@ in
     # consumer's zen default (mkForce to override).
     boot.kernelPackages = pkgs.linuxPackages_6_18;
 
-    # gttsize/ttm: size the GTT and TTM page pools for the 16 GiB unified RAM.
-    boot.kernelParams = [
-      "amdgpu.gttsize=14750"
-      "ttm.pages_limit=3776000"
-      "ttm.page_pool_size=3776000"
-    ];
+    # GTT/TTM sizing lives in memory.nix, driven by hardware.bc250.gpu.gttSize.
 
     hardware = {
       amdgpu = {
