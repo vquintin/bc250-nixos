@@ -24,6 +24,15 @@ in
   };
 
   config = lib.mkIf (cfg.enable && cfg.gpu.vramSizeMiB != null) {
+    # The UMA block is carved in 16 MiB units; a misaligned value would be
+    # silently rounded (or rejected) at POST. Catch it at eval time instead.
+    assertions = [
+      {
+        assertion = cfg.gpu.vramSizeMiB == null || lib.mod cfg.gpu.vramSizeMiB 16 == 0;
+        message = "hardware.bc250.gpu.vramSizeMiB (${toString cfg.gpu.vramSizeMiB}) must be a multiple of 16 MiB.";
+      }
+    ];
+
     environment.systemPackages = [ cfg.gpu.memcfgPackage ];
 
     systemd.services.bc250-memcfg = {
