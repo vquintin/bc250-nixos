@@ -1,6 +1,15 @@
-{ config, lib, ... }:
+{ config, lib, pkgs, ... }:
 let
   cfg = config.hardware.bc250;
+
+  # Same repo/rev as the bc250-40cu-tools package (packages/bc250-40cu-tools.nix);
+  # keep the two pins in sync.
+  src = pkgs.fetchFromGitHub {
+    owner = "duggasco";
+    repo = "bc250-40cu-unlock";
+    rev = "ae7c30c78e253a5e2c6af0e9c090f807b825191c";
+    hash = "sha256-cds5/cWQWN0KauU1a0bbwmmls4DCAowgqHRS+bER8fk=";
+  };
 in
 {
   # 40 CU unlock: the BC-250's gfx1013 die has 40 physical RDNA2 CUs but the
@@ -36,7 +45,7 @@ in
     boot.kernelPatches = [
       {
         name = "bc250-40cu-amdgpu";
-        patch = ../../patches/bc250-40cu-amdgpu.patch;
+        patch = "${src}/patch/bc250-40cu-amdgpu.patch";
       }
     ];
 
