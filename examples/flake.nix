@@ -93,6 +93,11 @@
               services.ollama = {
                 enable = true;
                 package = pkgs.ollama-vulkan;
+                # WARNING: 0.0.0.0 + the open firewall port below expose an
+                # UNAUTHENTICATED inference server to the whole network. Fine on a
+                # trusted LAN; do not do this on an untrusted network. Bind to
+                # "127.0.0.1" (and drop the port) to keep it host-local, or front
+                # it with a reverse proxy / tailnet that adds auth.
                 host = "0.0.0.0";
               };
               networking.firewall.allowedTCPPorts = [ 11434 ];
