@@ -5,5 +5,6 @@
 {
   imports = [
     ./cyan-skillfish-governor.nix
+    ./bc250-smu-oc.nix
   ];
 }

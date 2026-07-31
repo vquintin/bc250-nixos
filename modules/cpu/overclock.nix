@@ -70,16 +70,12 @@ in
       pkgs.stress
     ];
 
-    systemd.services.bc250-smu-oc = lib.mkIf ocfg.enable {
-      description = "AMD BC-250 CPU Overclock";
-      wantedBy = [ "multi-user.target" ];
-      after = [ "systemd-modules-load.service" ];
-      serviceConfig = {
-        Type = "oneshot";
-        RemainAfterExit = true;
-        # Runs as root, so bc250-apply writes PCI config space without sudo.
-        ExecStart = "${lib.getExe' ocfg.package "bc250-apply"} --apply ${configFile}";
-      };
+    # Drive the standalone service with the INI generated from the declarative
+    # options above.
+    services.bc250-smu-oc = lib.mkIf ocfg.enable {
+      enable = true;
+      package = ocfg.package;
+      inherit configFile;
     };
   };
 }
