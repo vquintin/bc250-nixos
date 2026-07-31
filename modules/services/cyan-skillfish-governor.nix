@@ -100,30 +100,47 @@ in
           };
         }
       );
+      # Upstream default-config.toml curve
+      # (github.com/filippor/cyan-skillfish-governor, smu branch).
       default = [
         {
-          frequency = 350;
+          frequency = 500;
           voltage = 700;
         }
         {
-          frequency = 1200;
-          voltage = 700;
+          frequency = 1000;
+          voltage = 800;
         }
         {
-          # 843 mV = the measured SMU AVFS floor at 1500 MHz: requesting less is
-          # silently clamped up to it.
-          frequency = 1500;
+          frequency = 1175;
           voltage = 850;
         }
         {
+          frequency = 1500;
+          voltage = 900;
+        }
+        {
+          frequency = 1600;
+          voltage = 910;
+        }
+        {
+          frequency = 1700;
+          voltage = 920;
+        }
+        {
+          frequency = 1850;
+          voltage = 930;
+        }
+        {
           frequency = 2000;
-          voltage = 925;
+          voltage = 960;
         }
       ];
       description = ''
         Voltage curve (frequency -> voltage) the governor interpolates between and
-        scales within {option}`frequencyRange` based on load. These are
-        board-specific; validate before lowering voltages.
+        scales within {option}`frequencyRange` based on load. Defaults to the
+        upstream default-config.toml curve; these are board-specific, so validate
+        before lowering voltages.
       '';
     };
 
