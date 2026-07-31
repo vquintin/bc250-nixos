@@ -14,8 +14,11 @@ On by default with `enable`:
 - **recommended tuning** — performance cpufreq governor + `scx_lavd` scheduler
   (both `mkDefault`).
 - **cyan-skillfish GPU governor** — adaptive SMU clock/voltage control.
-- **VRAM/UMA size** via CMOS (`bc250_memcfg`), self-healing each boot.
+- **VRAM/UMA size** via CMOS (`bc250_memcfg`), self-healing each boot (rewritten
+  only when the CMOS value has drifted).
 - **ACPI fix** — SSDTs adding the CPU C-/P-states the stock firmware omits.
+- **nct6687 sensors** — out-of-tree driver for the board's Nuvoton Super-I/O
+  chip, exposing temps/voltages/fans to lm_sensors.
 
 Opt-in:
 
