@@ -17,8 +17,9 @@ in
     example = true;
     description = ''
       Enable AMD BC-250 (ASRock BC-250, Oberon / Cyan Skillfish gfx1013) board
-      support: the GPU/board baseline (amdgpu, the 6.18 LTS kernel, IOMMU
-      disabled, the GTT/TTM tuning the shared 16 GiB memory needs), the SMU GPU
+      support: the GPU/board baseline (amdgpu, the 6.18 LTS kernel, the AMD
+      hardware IOMMU disabled, the GTT/TTM tuning the shared 16 GiB memory
+      needs), the SMU GPU
       governor, the CMOS VRAM size, the ACPI C/P-state fix, the nct6687 sensor
       driver, the recommended zswap tuning (once the host defines swap), and the
       recommended scheduler/governor tuning (performance cpufreq governor +
@@ -31,10 +32,12 @@ in
   };
 
   config = lib.mkIf cfg.enable {
-    # IOMMU is unstable on this card and must never come on.
+    # The AMD hardware IOMMU is unstable on this card, so keep it off
+    # (amd_iommu=off). Do NOT also pass iommu=off: that disables the software
+    # IOMMU (swiotlb) too, which breaks the BC-250's USB3 ports. Leaving iommu at
+    # its default lets Linux fall back to soft IOMMU, keeping USB3 working.
     boot.kernelParams = [
       "amd_iommu=off"
-      "iommu=off"
     ];
 
     # Recommended software tuning (mkDefault, host-overridable): the performance
