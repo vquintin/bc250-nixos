@@ -15,7 +15,9 @@ let
     runtimeInputs = [ pkgs.coreutils ];
     text = ''
       for _ in $(seq 1 30); do
-        if compgen -G "/dev/dri/renderD*" >/dev/null; then exit 0; fi
+        for node in /dev/dri/renderD*; do
+          [ -e "$node" ] && exit 0
+        done
         sleep 1
       done
       echo "no /dev/dri/renderD* after 30s; amdgpu not ready" >&2
