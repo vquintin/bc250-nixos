@@ -36,6 +36,7 @@
         cyan-skillfish-governor-smu = withOverlay [ ./modules/services/cyan-skillfish-governor.nix ];
         bc250-smu-oc = withOverlay [ ./modules/services/bc250-smu-oc.nix ];
         bc250-core-unlock = withOverlay [ ./modules/services/bc250-core-unlock.nix ];
+        bc250-cu-live-manager = withOverlay [ ./modules/services/bc250-cu-live-manager.nix ];
         bc250-memcfg = withOverlay [ ./modules/services/bc250-memcfg.nix ];
       };
 
@@ -44,6 +45,7 @@
           cyan-skillfish-governor
           bc250-smu-oc
           bc250-core-unlock
+          bc250-cu-live-manager
           bc250-40cu-tools
           bc250-memcfg
           ;

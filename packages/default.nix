@@ -5,6 +5,7 @@ final: _prev: {
     cyan-skillfish-governor = final.callPackage ./cyan-skillfish-governor { };
     bc250-smu-oc = final.callPackage ./bc250-smu-oc.nix { };
     bc250-core-unlock = final.callPackage ./bc250-core-unlock.nix { };
+    bc250-cu-live-manager = final.callPackage ./bc250-cu-live-manager.nix { };
     bc250-40cu-tools = final.callPackage ./bc250-40cu-tools.nix { };
     bc250-memcfg = final.callPackage ./bc250-memcfg.nix { };
   };

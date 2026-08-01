@@ -34,6 +34,10 @@ Opt-in:
 - **40 CU unlock** — out-of-tree amdgpu patch exposing all 40 RDNA2 CUs (factory
   firmware masks 16), plus a `disabledCUs` list to mask bad WGPs. Rebuilds the
   kernel.
+- **40 CU live unlock** — the same 40 CUs, but by writing the SPI WGP dispatch
+  masks at boot with `umr` instead of patching the kernel. No rebuild; a `masks`
+  list leaves defective WGPs unrouted. Alternative to the patch-based unlock —
+  enable one or the other.
 - **8-core unlock** — SMU core-mask write bringing 6c/12t to 8c/16t.
 - **CPU overclock/undervolt** — via SMU (brick risk, see below).
 - **40 CU diagnostic/health tools**.
@@ -58,6 +62,8 @@ inputs.bc250.url = "github:vquintin/bc250-nixos";
 
     gpu = {
       cuUnlock.enable = true;           # unlock all 40 CUs (rebuilds the kernel)
+      # cuLiveUnlock.enable = true;     # OR: same 40 CUs via umr at boot, no rebuild
+      # cuLiveUnlock.masks = [ "0x1f" "0x1f" "0x0f" "0x1f" ];  # drop a bad WGP
       vramSize = 512;                   # VRAM/UMA carve-out (MiB), default
       # gttSize = 14750;                # GTT aperture (MiB); vramSize+gttSize <= 16384
       # disabledCUs = [ "0.0.4" ];      # mask a bad WGP found via diagnostics
@@ -87,15 +93,23 @@ unfree.
   patch via `boot.kernelPatches`, so enabling it **compiles the kernel from
   source** — a long, resource-heavy build with no binary-cache hit, and it
   recompiles whenever the kernel or patch changes. Budget the build time (and
-  disk/RAM) accordingly, or leave it off. A no-rebuild alternative
-  (`bc250-cu-live-manager`, which sets the CU masks at runtime) is planned as a
-  `services.*` module.
-- **`gpu.cuUnlock`** exposes CUs the factory masked, some of which may be
+  disk/RAM) accordingly, or leave it off, or use `gpu.cuLiveUnlock` instead.
+- **`gpu.cuLiveUnlock` is the no-rebuild alternative.** It writes the SPI WGP
+  dispatch masks at boot via `umr` (runtime register writes) rather than patching
+  amdgpu, so it never compiles the kernel. Backed by the standalone
+  `services.bc250-cu-live-manager` (upstream
+  [WinnieLV/bc250-cu-live-manager](https://github.com/WinnieLV/bc250-cu-live-manager)),
+  which also ships an interactive WGP editor (`sudo bc250-cu-live-manager`). The
+  register writes are volatile, so the service re-applies them every boot. Enable
+  this **or** `gpu.cuUnlock`, not both. The upstream script has no license file,
+  so the package is marked unfree (allow unfree, as with `bc250-memcfg`).
+- **Both 40 CU unlocks** expose CUs the factory masked, some of which may be
   defective. **Verify the unlock works properly before trusting it**: enable
   `gpu.diagnostics` and run `bc250-compute-verify` (heavy Vulkan compute
-  correctness test); mask any bad WGP it finds via `gpu.disabledCUs`
-  (`bc250-cu-mask` prints the coordinates). Note: `gpu.disabledCUs` is untested —
-  all 40 CUs on my board are healthy, so I never needed to mask any.
+  correctness test). Mask a bad WGP with `gpu.disabledCUs` on the patch path
+  (`bc250-cu-mask` prints the coordinates), or by clearing its bit in
+  `gpu.cuLiveUnlock.masks` on the live path. Note: both mask options are
+  untested — all 40 CUs on my board are healthy, so I never needed to mask any.
 - **`cpu.overclock`** can *permanently brick* the board if you raise frequency
   without a matching undervolt. `scale` is a board-specific curve shift, not a
   voltage — find it with `bc250-detect` (on `PATH` whenever the board is
@@ -109,9 +123,9 @@ unfree.
 
 - `modules/` — the `hardware.bc250.*` facade tree (`cpu/`, `gpu/`), plus
   `modules/services/` — standalone `services.<tool>.*` modules (the governor,
-  smu-oc, core-unlock, memcfg mechanisms) that the facade drives.
+  smu-oc, core-unlock, cu-live-manager, memcfg mechanisms) that the facade drives.
 - `packages/` — the `pkgs.bc250.*` overlay (governor, smu-oc, core-unlock,
-  40cu-tools, memcfg).
+  cu-live-manager, 40cu-tools, memcfg).
 - `examples/` — a standalone flake building a SteamOS and a Vulkan-inference
   image.
 
