@@ -31,13 +31,9 @@ On by default with `enable`:
 
 Opt-in:
 
-- **40 CU unlock** — out-of-tree amdgpu patch exposing all 40 RDNA2 CUs (factory
-  firmware masks 16), plus a `disabledCUs` list to mask bad WGPs. Rebuilds the
-  kernel.
-- **40 CU live unlock** — the same 40 CUs, but by writing the SPI WGP dispatch
-  masks at boot with `umr` instead of patching the kernel. No rebuild; a `masks`
-  list leaves defective WGPs unrouted. Alternative to the patch-based unlock —
-  enable one or the other.
+- **40 CU unlock** — exposes all 40 RDNA2 CUs (factory firmware routes 24) by
+  writing the SPI WGP dispatch masks at boot with `umr` — **no kernel rebuild**.
+  A `masks` list leaves defective WGPs unrouted.
 - **8-core unlock** — SMU core-mask write bringing 6c/12t to 8c/16t.
 - **CPU overclock/undervolt** — via SMU (brick risk, see below).
 - **40 CU diagnostic/health tools**.
@@ -61,12 +57,11 @@ inputs.bc250.url = "github:vquintin/bc250-nixos";
     };
 
     gpu = {
-      cuUnlock.enable = true;           # unlock all 40 CUs (rebuilds the kernel)
-      # cuLiveUnlock.enable = true;     # OR: same 40 CUs via umr at boot, no rebuild
-      # cuLiveUnlock.masks = [ "0x1f" "0x1f" "0x0f" "0x1f" ];  # drop a bad WGP
+      cuUnlock.enable = true;           # unlock all 40 CUs (via umr at boot, no rebuild)
+      # cuUnlock.masks = [ "0x1f" "0x1f" "0x0f" "0x1f" ];  # drop a bad WGP
       vramSize = 512;                   # VRAM/UMA carve-out (MiB), default
       # gttSize = 14750;                # GTT aperture (MiB); vramSize+gttSize <= 16384
-      # disabledCUs = [ "0.0.4" ];      # mask a bad WGP found via diagnostics
+      # disabledCUs = [ "0.0.4" ];      # driver-level mask for the base 24 CUs
       # diagnostics.enable = true;      # cu_map / compute-verify / health tools
     };
   };
@@ -89,27 +84,22 @@ unfree.
 
 ## Warnings
 
-- **`gpu.cuUnlock` rebuilds the kernel.** It applies an out-of-tree amdgpu
-  patch via `boot.kernelPatches`, so enabling it **compiles the kernel from
-  source** — a long, resource-heavy build with no binary-cache hit, and it
-  recompiles whenever the kernel or patch changes. Budget the build time (and
-  disk/RAM) accordingly, or leave it off, or use `gpu.cuLiveUnlock` instead.
-- **`gpu.cuLiveUnlock` is the no-rebuild alternative.** It writes the SPI WGP
-  dispatch masks at boot via `umr` (runtime register writes) rather than patching
-  amdgpu, so it never compiles the kernel. Backed by the standalone
-  `services.bc250-cu-live-manager` (upstream
+- **`gpu.cuUnlock` writes GPU registers at runtime — no kernel rebuild.** It
+  clears the harvest mask and rewrites the SPI WGP dispatch masks at boot via
+  `umr`, backed by the standalone `services.bc250-cu-live-manager` (upstream
   [WinnieLV/bc250-cu-live-manager](https://github.com/WinnieLV/bc250-cu-live-manager)),
   which also ships an interactive WGP editor (`sudo bc250-cu-live-manager`). The
-  register writes are volatile, so the service re-applies them every boot. Enable
-  this **or** `gpu.cuUnlock`, not both. The upstream script has no license file,
-  so the package is marked unfree (allow unfree, as with `bc250-memcfg`).
-- **Both 40 CU unlocks** expose CUs the factory masked, some of which may be
+  register writes are volatile, so the service re-applies them every boot. Note:
+  the amdgpu driver still reports `active_cu_number=24` (its cached init count) —
+  the extra WGPs dispatch anyway; verify with `bc250-cu-live-manager status`
+  (shows the routed WGPs), not `amdgpu_top`. The upstream script has no license
+  file, so the package is marked unfree (allow unfree, as with `bc250-memcfg`).
+- **`gpu.cuUnlock`** exposes CUs the factory masked, some of which may be
   defective. **Verify the unlock works properly before trusting it**: enable
   `gpu.diagnostics` and run `bc250-compute-verify` (heavy Vulkan compute
-  correctness test). Mask a bad WGP with `gpu.disabledCUs` on the patch path
-  (`bc250-cu-mask` prints the coordinates), or by clearing its bit in
-  `gpu.cuLiveUnlock.masks` on the live path. Note: both mask options are
-  untested — all 40 CUs on my board are healthy, so I never needed to mask any.
+  correctness test). Leave a bad WGP unrouted by clearing its bit in
+  `gpu.cuUnlock.masks`. Note: this is untested — all 40 CUs on my board are
+  healthy, so I never needed to mask any.
 - **`cpu.overclock`** can *permanently brick* the board if you raise frequency
   without a matching undervolt. `scale` is a board-specific curve shift, not a
   voltage — find it with `bc250-detect` (on `PATH` whenever the board is
@@ -157,8 +147,10 @@ tools it packages and wires:
   community documentation hub this follows.
 - [filippor/cyan-skillfish-governor](https://github.com/filippor/cyan-skillfish-governor)
   (`smu` branch) — the adaptive SMU GPU governor.
+- [WinnieLV/bc250-cu-live-manager](https://github.com/WinnieLV/bc250-cu-live-manager)
+  — the runtime 40 CU unlock (SPI WGP masks via `umr`, no kernel rebuild).
 - [duggasco/bc250-40cu-unlock](https://github.com/duggasco/bc250-40cu-unlock) —
-  the 40 CU amdgpu patch and diagnostic/health tools.
+  the 40 CU diagnostic/health tools.
 - [rw-r-r-0644/bc250-core-unlock](https://github.com/rw-r-r-0644/bc250-core-unlock)
   — the 8-core SMU unlock.
 - [bc250-collective/bc250_smu_oc](https://github.com/bc250-collective/bc250_smu_oc)

@@ -11,12 +11,12 @@ in
       "1.0.4"
     ];
     description = ''
-      Compute units to disable via `amdgpu.disable_cu=`, each as
-      `shader_engine.shader_array.cu`. Use after the 40 CU health tools
-      ({option}`hardware.bc250.gpu.diagnostics.enable`) turn up a defective WGP
-      among the newly-unlocked CUs -- `bc250-cu-mask` prints the coordinates to
-      list here. The cyan-skillfish governor is CU-agnostic, so this only masks
-      CUs at the driver; it does not feed the governor.
+      Compute units to disable via the stock `amdgpu.disable_cu=` kernel param,
+      each as `shader_engine.shader_array.cu`. This only reaches the base 24 CUs
+      the driver enumerates -- to mask a bad WGP among the umr-routed ones, clear
+      its bit in {option}`hardware.bc250.gpu.cuUnlock.masks` instead. The
+      cyan-skillfish governor is CU-agnostic, so this only masks CUs at the
+      driver; it does not feed the governor.
     '';
   };
 

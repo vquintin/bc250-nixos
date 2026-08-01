@@ -6,51 +6,55 @@
 }:
 let
   cfg = config.hardware.bc250;
-
-  # Same repo/rev as the bc250-40cu-tools package (packages/bc250-40cu-tools.nix);
-  # keep the two pins in sync.
-  src = pkgs.fetchFromGitHub {
-    owner = "duggasco";
-    repo = "bc250-40cu-unlock";
-    rev = "ae7c30c78e253a5e2c6af0e9c090f807b825191c";
-    hash = "sha256-cds5/cWQWN0KauU1a0bbwmmls4DCAowgqHRS+bER8fk=";
-  };
+  ucfg = cfg.gpu.cuUnlock;
 in
 {
-  # 40 CU unlock: the BC-250's gfx1013 die has 40 physical RDNA2 CUs but the
-  # factory firmware soft-masks 16, exposing only 24. This patch clears the
-  # harvest mask (CC_GC_SHADER_ARRAY_CONFIG) and enables SPI dispatch to all 5
-  # WGPs per shader array during gfx_v10_0_get_cu_info(). Gated on PCI ID 0x13FE
-  # (BC-250 only) and the bc250_cc_write_mode module param, so it's inert on any
-  # other host sharing this kernel. Rebuilds the kernel from source.
-  # Source: https://github.com/duggasco/bc250-40cu-unlock
+  # Facade: the 40 CU unlock. The BC-250's gfx1013 die has 40 physical RDNA2 CUs
+  # (20 WGPs, 2 CUs each) but the factory firmware routes only 24. This enables
+  # the standalone services.bc250-cu-live-manager, which clears the harvest mask
+  # and rewrites the SPI WGP dispatch masks at boot via umr (runtime register
+  # writes) -- so it routes all 40 CUs with no kernel rebuild. See that service
+  # for the mechanism. Some unlocked CUs may be defective (see the README), so it
+  # is opt-in.
   options.hardware.bc250.gpu.cuUnlock = {
     enable = lib.mkEnableOption ''
-      the 40 CU unlock -- expose all 40 RDNA2 compute units (factory firmware
-      exposes 24). Applies an out-of-tree amdgpu patch, so it rebuilds the
-      kernel, and some unlocked CUs may be defective (see the README), so it is
-      opt-in'';
+      the 40 CU unlock -- route all 40 RDNA2 CUs by writing the SPI WGP dispatch
+      masks at boot via umr (runtime register writes, no kernel rebuild). Some
+      unlocked CUs may be defective (see the README), so it is opt-in'';
 
-    mode = lib.mkOption {
-      type = lib.types.ints.between 0 3;
-      default = 3;
+    masks = lib.mkOption {
+      type = lib.types.listOf lib.types.str;
+      default = [
+        "0x1f"
+        "0x1f"
+        "0x1f"
+        "0x1f"
+      ];
+      example = [
+        "0x1f"
+        "0x1f"
+        "0x0f"
+        "0x1f"
+      ];
       description = ''
-        amdgpu.bc250_cc_write_mode: 0 = off (patch default), 3 = clear all shader
-        arrays -> enable all 40 CUs.
+        Per-shader-array WGP dispatch masks, one 5-bit value (`0x00`..`0x1f`) for
+        each of the four shader arrays in order SE0.SH0, SE0.SH1, SE1.SH0,
+        SE1.SH1. Each set bit routes one WGP (= 2 CUs); the default `0x1f` x4
+        routes all 40 CUs. Clear a bit to leave a defective WGP unrouted (e.g.
+        `0x0f` drops WGP4 -> CU8/CU9 on that array) -- this is how you mask a bad
+        WGP among the umr-routed CUs (the driver-level
+        {option}`hardware.bc250.gpu.disabledCUs` only reaches the base 24).
       '';
     };
+
+    package = lib.mkPackageOption pkgs [ "bc250" "bc250-cu-live-manager" ] { };
   };
 
-  config = lib.mkIf (cfg.enable && cfg.gpu.cuUnlock.enable) {
-    boot.kernelPatches = [
-      {
-        name = "bc250-40cu-amdgpu";
-        patch = "${src}/patch/bc250-40cu-amdgpu.patch";
-      }
-    ];
-
-    boot.kernelParams = [
-      "amdgpu.bc250_cc_write_mode=${toString cfg.gpu.cuUnlock.mode}"
-    ];
+  config = lib.mkIf (cfg.enable && ucfg.enable) {
+    services.bc250-cu-live-manager = {
+      enable = true;
+      package = ucfg.package;
+      masks = ucfg.masks;
+    };
   };
 }

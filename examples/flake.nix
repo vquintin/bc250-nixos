@@ -41,7 +41,7 @@
 
         hardware.bc250 = {
           enable = true;
-          gpu.cuUnlock.enable = true; # all 40 CUs (rebuilds the kernel)
+          gpu.cuUnlock.enable = true; # all 40 CUs (via umr at boot, no rebuild)
           cpu.coreUnlock.enable = true; # 8c/16t
         };
 

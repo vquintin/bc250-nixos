@@ -10,7 +10,6 @@ in
 {
   imports = [
     ./cu-unlock.nix
-    ./cu-live-unlock.nix
     ./cu-list.nix
     ./memory.nix
     ./diagnostics.nix

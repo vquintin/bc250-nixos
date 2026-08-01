@@ -27,8 +27,7 @@ let
 in
 {
   # Standalone service routing the BC-250's CU/WGP dispatch at boot with umr --
-  # a no-kernel-rebuild alternative to the amdgpu 40 CU patch
-  # (modules/gpu/cu-unlock.nix). Upstream:
+  # the mechanism behind the 40 CU unlock, with no kernel rebuild. Upstream:
   # https://github.com/WinnieLV/bc250-cu-live-manager
   #
   # The gfx1013 die has 40 physical RDNA2 CUs (20 WGPs, 2 CUs each) but the
@@ -40,7 +39,7 @@ in
   # may be defective; validate before trusting them, and drop a WGP's bit from
   # `masks` to leave it unrouted.
   #
-  # Generic over the mask table; hardware.bc250.gpu.cuLiveUnlock is the facade.
+  # Generic over the mask table; hardware.bc250.gpu.cuUnlock is the facade.
   # apply-service reads the table from a fixed conf file
   # (/etc/bc250-cu-live-manager.conf), so the module generates that file rather
   # than passing masks on the CLI.

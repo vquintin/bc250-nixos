@@ -1,6 +1,6 @@
-# Diagnostic/health tooling for the 40 CU unlock (the kernel patch itself is
-# applied by modules/gpu/cu-unlock.nix). Upstream:
-# https://github.com/duggasco/bc250-40cu-unlock
+# Diagnostic/health tooling for the 40 CU unlock (the unlock itself is applied
+# at runtime by services.bc250-cu-live-manager; hardware.bc250.gpu.cuUnlock is
+# the facade). Upstream: https://github.com/duggasco/bc250-40cu-unlock
 #
 #   cu_map                 harvest/enumeration map (+ optional health overlay)
 #   bc250-compute-verify   heavy Vulkan compute correctness test (no reboot) --
@@ -16,7 +16,8 @@
 #   bc250-40cu-benchmark   Vulkan compute throughput benchmark across the CUs
 #
 # The upstream enable-* installer scripts are intentionally omitted: they rebuild
-# amdgpu out-of-tree, which cu-unlock.nix already does via boot.kernelPatches.
+# amdgpu out-of-tree, whereas this repo unlocks the CUs at runtime via umr
+# (services.bc250-cu-live-manager) with no kernel rebuild.
 {
   lib,
   stdenvNoCC,
