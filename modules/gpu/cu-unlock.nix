@@ -42,8 +42,7 @@ in
         SE1.SH1. Each set bit routes one WGP (= 2 CUs); the default `0x1f` x4
         routes all 40 CUs. Clear a bit to leave a defective WGP unrouted (e.g.
         `0x0f` drops WGP4 -> CU8/CU9 on that array) -- this is how you mask a bad
-        WGP among the umr-routed CUs (the driver-level
-        {option}`hardware.bc250.gpu.disabledCUs` only reaches the base 24).
+        WGP found via {option}`hardware.bc250.gpu.diagnostics.enable`.
       '';
     };
 

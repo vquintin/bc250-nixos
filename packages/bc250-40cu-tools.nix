@@ -8,11 +8,10 @@
 #   bc250-cu-health-test   `quick`/`status` work; `start` (20-reboot per-WGP
 #                          isolation) does NOT -- it shells out to dracut/
 #                          update-initramfs and rewrites /etc/modprobe.d, none of
-#                          which apply on NixOS. For per-WGP isolation, drive the
-#                          hardware.bc250.gpu.disabledCUs option instead.
-#   bc250-cu-mask          prints the disable_cu= line to add if a bad WGP is
-#                          found (don't --install: it writes /etc/modprobe.d,
-#                          which NixOS ignores)
+#                          which apply on NixOS. To leave a bad WGP unrouted,
+#                          clear its bit in hardware.bc250.gpu.cuUnlock.masks.
+#   bc250-cu-mask          prints a disable_cu= line (upstream's kernel-param
+#                          approach; on NixOS mask via cuUnlock.masks instead)
 #   bc250-40cu-benchmark   Vulkan compute throughput benchmark across the CUs
 #
 # The upstream enable-* installer scripts are intentionally omitted: they rebuild

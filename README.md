@@ -61,7 +61,6 @@ inputs.bc250.url = "github:vquintin/bc250-nixos";
       # cuUnlock.masks = [ "0x1f" "0x1f" "0x0f" "0x1f" ];  # drop a bad WGP
       vramSize = 512;                   # VRAM/UMA carve-out (MiB), default
       # gttSize = 14750;                # GTT aperture (MiB); vramSize+gttSize <= 16384
-      # disabledCUs = [ "0.0.4" ];      # driver-level mask for the base 24 CUs
       # diagnostics.enable = true;      # cu_map / compute-verify / health tools
     };
   };
