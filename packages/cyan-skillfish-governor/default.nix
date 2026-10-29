@@ -12,13 +12,13 @@
 }:
 rustPlatform.buildRustPackage (finalAttrs: {
   pname = "cyan-skillfish-governor-smu";
-  version = "0.4.0-smu-unstable-2026-07-29";
+  version = "0.4.0-smu-unstable-2026-10-02";
 
   src = fetchFromGitHub {
     owner = "filippor";
     repo = "cyan-skillfish-governor";
-    rev = "60ab6e5b354f01f287c73d920990dcd618a674cc"; # branch: smu
-    hash = "sha256-3XvOVvX0/uvzxnnxS2iP8uaH20V28VIxeQaBljeP4DU=";
+    rev = "7b08fdcf542d1edd82f3a9077c902038019c9842"; # branch: smu
+    hash = "sha256-9MLUtRVefOr4omMcW9QC3sYV+amPCyBgm6dmlJo9/bo=";
   };
 
   cargoLock.lockFile = ./Cargo.lock;

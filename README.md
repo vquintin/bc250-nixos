@@ -23,7 +23,10 @@ On by default with `enable`:
 - **cyan-skillfish GPU governor** — adaptive SMU clock/voltage control.
 - **VRAM/UMA size** via CMOS (`bc250_memcfg`), self-healing each boot (rewritten
   only when the CMOS value has drifted).
-- **ACPI fix** — SSDTs adding the CPU C-/P-states the stock firmware omits.
+- **ACPI fix** — SSDTs adding the CPU C-/P-states the stock firmware omits
+  (all 16 threads, so 8-core-unlocked boards too) and stubbing the methods
+  behind the boot-time ACPI errors. Turn it off on a modded BIOS that ships its
+  own tables.
 - **nct6687 sensors** — out-of-tree driver for the board's Nuvoton Super-I/O
   chip, exposing temps/voltages/fans to lm_sensors.
 - **zswap tuning** — lz4/zsmalloc compressed cache in front of disk swap
@@ -71,8 +74,8 @@ inputs.bc250.url = "github:vquintin/bc250-nixos";
 ```
 
 The aggregate module applies the package overlay (`pkgs.bc250.*`) itself.
-`bc250-memcfg` is unfree (no upstream license), so the consumer must allow
-unfree.
+`bc250-cu-live-manager` (behind `gpu.cuUnlock`) is unfree (no upstream
+license), so a consumer enabling the CU unlock must allow unfree.
 
 ## Examples
 
@@ -92,7 +95,7 @@ unfree.
   the amdgpu driver still reports `active_cu_number=24` (its cached init count) —
   the extra WGPs dispatch anyway; verify with `bc250-cu-live-manager status`
   (shows the routed WGPs), not `amdgpu_top`. The upstream script has no license
-  file, so the package is marked unfree (allow unfree, as with `bc250-memcfg`).
+  file, so the package is marked unfree (allow unfree).
 - **`gpu.cuUnlock`** exposes CUs the factory masked, some of which may be
   defective. **Verify the unlock works properly before trusting it**: enable
   `gpu.diagnostics` and run `bc250-compute-verify` (heavy Vulkan compute
@@ -106,7 +109,10 @@ unfree.
 - **`cpu.coreUnlock`** enables two factory-disabled cores. Validate them
   (`stress-ng --cpu 16 --verify`, watch machine-check exceptions) before
   trusting them. The unlock is volatile: it re-applies and reboots once on each
-  cold boot.
+  cold boot. It refuses boards whose core mask isn't the usual 0x77 (likely a
+  real harvest of defective cores) unless `cpu.coreUnlock.force` is set. With
+  8 cores amdgpu misreports the GPU clock, so the facade turns on the
+  governor's `fixFrequency` (real clock from the SMU).
 
 ## Layout
 
@@ -154,8 +160,9 @@ tools it packages and wires:
   — the 8-core SMU unlock.
 - [bc250-collective/bc250_smu_oc](https://github.com/bc250-collective/bc250_smu_oc)
   — CPU overclock/undervolt via the SMU.
-- [bc250-collective/bc250-acpi-fix](https://github.com/bc250-collective/bc250-acpi-fix)
-  — the C-/P-state SSDTs.
+- [e-tho/bc250-acpi-fix](https://github.com/e-tho/bc250-acpi-fix) — the
+  C-/P-state SSDTs (8-core aware; builds on
+  [bc250-collective/bc250-acpi-fix](https://github.com/bc250-collective/bc250-acpi-fix)).
 - [fanoush/bc250_memcfg](https://github.com/fanoush/bc250_memcfg) — CMOS
   VRAM/UMA sizing without a modded BIOS.
 - [Fred78290/nct6687d](https://github.com/Fred78290/nct6687d) — the Nuvoton
@@ -174,5 +181,5 @@ layout).
 
 The glue in this repo (modules, packaging expressions) is [MIT](LICENSE). The
 upstream projects it fetches and wraps keep their own licenses — see each
-`packages/*.nix`'s `meta.license` (note `bc250-memcfg` is unfree: no upstream
-license).
+`packages/*.nix`'s `meta.license` (note `bc250-cu-live-manager` is unfree: no
+upstream license).

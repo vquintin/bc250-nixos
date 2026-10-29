@@ -10,13 +10,13 @@
 }:
 stdenv.mkDerivation {
   pname = "bc250-memcfg";
-  version = "0-unstable-2026-07-30";
+  version = "0-unstable-2026-09-11";
 
   src = fetchFromGitHub {
     owner = "fanoush";
     repo = "bc250_memcfg";
-    rev = "829e8d64f23c5ad1e1d662f4eab488f31e0daa72";
-    hash = "sha256-5qOz1b7Rx18Xjg/cLYU6XTVpG0Fcmz9ezCsO59vAyNg=";
+    rev = "222420fbaeedadb7894fb0a782bdb61fa7b084af";
+    hash = "sha256-2+CbxQIoKMTDA+Oz3JhKg5q3YVY8OdaU32qqzFu4/zM=";
   };
 
   # Upstream Makefile just runs `gcc -Os -s main.cpp -o bc250memcfg`.
@@ -29,7 +29,7 @@ stdenv.mkDerivation {
   meta = {
     description = "Set BC-250 CMOS BIOS memory configuration (UMA/VRAM size) from Linux";
     homepage = "https://github.com/fanoush/bc250_memcfg";
-    license = lib.licenses.unfree; # no license file upstream
+    license = lib.licenses.mit;
     mainProgram = "bc250memcfg";
     platforms = lib.platforms.linux;
   };

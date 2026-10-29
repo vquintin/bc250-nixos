@@ -36,7 +36,7 @@
       bc250Base = {
         imports = [ bc250.nixosModules.default ];
 
-        # steam and bc250-memcfg are unfree.
+        # steam and bc250-cu-live-manager are unfree.
         nixpkgs.config.allowUnfree = true;
 
         hardware.bc250 = {

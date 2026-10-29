@@ -9,7 +9,7 @@
       system = "x86_64-linux";
       pkgs = import nixpkgs {
         inherit system;
-        # bc250-memcfg has no upstream license (marked unfree).
+        # bc250-cu-live-manager has no upstream license (marked unfree).
         config.allowUnfree = true;
         overlays = [ self.overlays.default ];
       };

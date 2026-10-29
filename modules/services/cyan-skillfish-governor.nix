@@ -28,6 +28,7 @@ let
 
     "gpu-usage" = {
       "fix-metrics" = true;
+      "fix-freq" = cfg.fixFrequency;
       method = "busy-flag";
       "flush-every" = 10;
     };
@@ -83,6 +84,16 @@ in
         default = 2000;
         description = "Upper GPU clock bound (MHz) the governor may scale to.";
       };
+    };
+
+    fixFrequency = lib.mkOption {
+      type = lib.types.bool;
+      default = false;
+      description = ''
+        Bind-mount over amdgpu's hwmon `freq1_input` with the real GPU clock read
+        from the SMU (upstream `gpu-usage.fix-freq`). Needed on 8-core-unlocked
+        boards, where amdgpu's derived clock reads nonsense (~20 MHz).
+      '';
     };
 
     safePoints = lib.mkOption {
@@ -175,7 +186,7 @@ in
         "systemd-modules-load.service"
         "dbus.service"
       ];
-      # fix-metrics bind-mounts a patched gpu_metrics table via mount/umount; a
+      # fix-metrics/fix-freq bind-mount patched sysfs files via mount/umount; a
       # bare unit PATH lacks util-linux, so the spawn would fail with ENOENT.
       path = [ pkgs.util-linux ];
       serviceConfig = {
