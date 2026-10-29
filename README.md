@@ -16,8 +16,9 @@ It packages and wires the community tooling documented at
 
 On by default with `enable`:
 
-- **amdgpu baseline** — 6.18 LTS kernel, GTT/TTM sizing for the 16 GiB unified
-  RAM, the AMD hardware IOMMU off (`amd_iommu=off`).
+- **amdgpu baseline** — latest stable kernel (7.2+ fixes DP audio), GTT/TTM
+  sizing for the 16 GiB unified RAM, the AMD hardware IOMMU off
+  (`amd_iommu=off`).
 - **recommended tuning** — performance cpufreq governor + `scx_lavd` scheduler
   (both `mkDefault`).
 - **cyan-skillfish GPU governor** — adaptive SMU clock/voltage control.

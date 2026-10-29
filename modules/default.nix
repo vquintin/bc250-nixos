@@ -17,7 +17,7 @@ in
     example = true;
     description = ''
       Enable AMD BC-250 (ASRock BC-250, Oberon / Cyan Skillfish gfx1013) board
-      support: the GPU/board baseline (amdgpu, the 6.18 LTS kernel, the AMD
+      support: the GPU/board baseline (amdgpu, the latest stable kernel, the AMD
       hardware IOMMU disabled, the GTT/TTM tuning the shared 16 GiB memory
       needs), the SMU GPU
       governor, the CMOS VRAM size, the ACPI C/P-state fix, the nct6687 sensor
