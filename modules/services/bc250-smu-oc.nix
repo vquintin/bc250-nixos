@@ -34,6 +34,11 @@ in
       description = "AMD BC-250 CPU Overclock";
       wantedBy = [ "multi-user.target" ];
       after = [ "systemd-modules-load.service" ];
+      # The governor drives the same SMU index/data pair (0xB8/0xBC) without
+      # locking whole mailbox exchanges, so running concurrently can hit the wrong
+      # SMN address (bc250_smu_oc#8). Finish first; the governor then also sets
+      # the GPU temperature limit last, deterministically.
+      before = [ "cyan-skillfish-governor-smu.service" ];
       serviceConfig = {
         Type = "oneshot";
         RemainAfterExit = true;
