@@ -1,0 +1,40 @@
+# On each push: bump the `bc250` input of nixos-config to this commit. That push
+# runs nixos-config's own deploy workflow, which rebuilds the machines.
+name: bump nixos-config
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  bump:
+    runs-on: native
+    steps:
+      # DEPLOY_SSH_KEY: the CI deploy key (machines/ci/deploy_ed25519.pub in
+      # nixos-config), allowed to push to nixos-config.
+      - name: Load deploy key
+        run: |
+          eval "$(ssh-agent -s)"
+          ssh-add - <<<"${{ secrets.DEPLOY_SSH_KEY }}"
+          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
+          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> "$GITHUB_ENV"
+
+      # Retried: a push to nixos-config in between makes ours non-fast-forward.
+      - name: Bump nixos-config
+        run: |
+          git clone --depth 1 ssh://forgejo@forgejo.quintin.home.arpa/virgile/nixos-config.git cfg
+          cd cfg
+          for attempt in 1 2 3; do
+            nix flake update bc250
+            git diff --quiet && exit 0
+            git -c user.name="Forgejo Actions" -c user.email=ci@quintin.home.arpa \
+              commit -qam "flake.lock: bc250 → ${GITHUB_SHA::7}"
+            git push origin HEAD:main && exit 0
+            git fetch --depth 1 origin main && git reset -q --hard origin/main
+          done
+          exit 1
+
+      - name: Stop agent
+        if: always()
+        run: ssh-agent -k
