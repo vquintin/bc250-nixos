@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# with-key CMD...: runs CMD with the deploy key ($DEPLOY_SSH_KEY) in an
+# ssh-agent that lives exactly as long as CMD. Nothing outlives the step, even
+# when the job is cancelled: on this host runner, an agent left in the
+# background would stay until the runner restarts.
+exec ssh-agent bash -c 'ssh-add -q - <<<"$DEPLOY_SSH_KEY" && exec "$@"' bash "$@"

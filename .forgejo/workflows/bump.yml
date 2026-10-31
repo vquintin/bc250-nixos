@@ -10,31 +10,24 @@ on:
 jobs:
   bump:
     runs-on: native
+    # The CI deploy key (machines/ci/deploy_ed25519.pub in nixos-config),
+    # allowed to push to nixos-config. Only ever loaded by .forgejo/with-key.
+    env:
+      DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
     steps:
-      # DEPLOY_SSH_KEY: the CI deploy key (machines/ci/deploy_ed25519.pub in
-      # nixos-config), allowed to push to nixos-config.
-      - name: Load deploy key
-        run: |
-          eval "$(ssh-agent -s)"
-          ssh-add - <<<"${{ secrets.DEPLOY_SSH_KEY }}"
-          echo "SSH_AUTH_SOCK=$SSH_AUTH_SOCK" >> "$GITHUB_ENV"
-          echo "SSH_AGENT_PID=$SSH_AGENT_PID" >> "$GITHUB_ENV"
+      - uses: actions/checkout@v4
 
       # Retried: a push to nixos-config in between makes ours non-fast-forward.
       - name: Bump nixos-config
         run: |
-          git clone --depth 1 ssh://forgejo@forgejo.quintin.home.arpa/virgile/nixos-config.git cfg
+          .forgejo/with-key git clone --depth 1 ssh://forgejo@forgejo.quintin.home.arpa/virgile/nixos-config.git cfg
           cd cfg
           for attempt in 1 2 3; do
-            nix flake update bc250
+            ../.forgejo/with-key nix flake update bc250
             git diff --quiet && exit 0
             git -c user.name="Forgejo Actions" -c user.email=ci@quintin.home.arpa \
               commit -qam "flake.lock: bc250 → ${GITHUB_SHA::7}"
-            git push origin HEAD:main && exit 0
-            git fetch --depth 1 origin main && git reset -q --hard origin/main
+            ../.forgejo/with-key git push origin HEAD:main && exit 0
+            ../.forgejo/with-key git fetch --depth 1 origin main && git reset -q --hard origin/main
           done
           exit 1
-
-      - name: Stop agent
-        if: always()
-        run: ssh-agent -k
